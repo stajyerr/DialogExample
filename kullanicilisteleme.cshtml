@@ -1,0 +1,102 @@
+@model List<DialogExample.ViewModel.KullaniciViewModel>
+
+<style type="text/css">
+    .table-user tr td {
+        width: 150px;
+    }
+</style>
+<table class="table-user">
+    <thead>
+        <tr>
+            <td>
+                Tc Numarası
+            </td>
+            <td>
+                Adı Soyadı
+            </td>
+            <td>
+                Bölüm
+            </td>
+            <td>
+                Program
+            </td>
+            <td>
+                Cep Telefonu
+            </td>
+            <td>
+                Bisiklet Numarası
+            </td>
+            <td>
+                Veriliş Tarihi
+            </td>
+            <td>
+                İade Tarihi
+            </td>
+            <td>
+                İşlem
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var kullanici in Model)
+        {
+            <tr>
+                <td>
+                    @kullanici.Tc
+                </td>
+                <td>
+                    @kullanici.AdSoyad
+                </td>
+                <td>
+                    @kullanici.BolumID
+                </td>
+                <td>
+                    @kullanici.ProgramID
+                </td>
+                <td>
+                    @kullanici.Cep
+                </td>
+                <td>
+                    @kullanici.Bisiklet
+                </td>
+                <td>
+                    @kullanici.Verilis.ToShortDateString()
+                </td>
+                <td>
+                    @kullanici.Iade.ToShortDateString()
+                </td>
+
+                <td>
+                    <input type="button" value="Güncelle" data-id="@kullanici.KullaniciID" class="btn-update" />
+                    <input type="button" class="delete-row" value="Sil" data-id="@kullanici.KullaniciID" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".btn-update").click(function () {
+            $("#dialog-user").dialog("open");
+            var id = $(this).attr("data-id");
+
+            $.ajax({
+                url: '/Home/KullaniciGetir',
+                type: 'POST',
+                dataType: 'json',
+                data: { "id": id },
+                success: function (data) {
+                    $("#KullaniciID").val(data.KullaniciID);
+                    $("#Tc").val(data.Tc)  // oluşturmuş olduğumuz modellerde helperların içerisine propertyler belirtildiğinde aksi olmadıkça bu : Örnek texboxların  classınların ismi propertydeki isimler oluyor.
+                    $("#AdSoyad").val(data.AdSoyad);
+                    $("#Bolumler").val(data.Bolumler);
+                    $("#Programlar").val(data.Programlar);
+                    $("#Cep").val(data.Cep);
+                    $("#Bisiklet").val(data.Bisiklet);
+                    $("#Verilis").val(Data.Verilis);
+                    $("#Iade").val(Data.Iade);
+                }
+            });
+        });
+    });
+</script>
