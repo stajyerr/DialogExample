@@ -1,0 +1,139 @@
+@model DialogExample.ViewModel.KullaniciViewModel
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Kullanıcı List</h2>
+<input type="button" value="Yeni Kullanıcı" id="btn-create" />
+
+<div id="user-content">
+    @Html.Action("KullaniciList", "Home")
+</div>
+<div id="dialog-user" title="Kullanıcı İşlemleri">
+    @using (Ajax.BeginForm("Create", "Home", FormMethod.Post, new AjaxOptions { OnSuccess = "Create" }, new { id = "frm-create" }))
+    {
+        @Html.HiddenFor(m => m.KullaniciID)
+        <div>
+            Tc Kimlik Numarası:
+            <br />
+            @Html.TextBoxFor(m => m.Tc)
+            </div>
+        
+            <div>
+            Ad Soyad:
+            <br />
+            @Html.TextBoxFor(m => m.AdSoyad)
+            </div>
+            <div>
+            Akademik-Yönetim
+            <br />
+            @Html.DropDownListFor(m => m.BolumID,Model.BolumList )
+            </div>
+            <div>
+            Bölüm-Birim:
+            <br />
+            @Html.DropDownListFor(m => m.ProgramID,Model.ProgramList)
+            </div>
+            <div>
+            Cep Telefonu:
+            <br />
+            @Html.TextBoxFor(m => m.Cep)
+
+            </div>
+            <div>
+            Bisiklet Numarası:
+            <br />
+            @Html.TextBoxFor(m => m.Bisiklet)
+
+            </div>
+        
+        <div>
+            Veriliş Tarihi:
+            <br/>
+            @Html.EditorFor(m => m.Verilis)
+        </div>
+        <div>
+            İade Tarihi:
+            <br />
+            @Html.EditorFor(m => m.Iade)
+        </div>
+        
+        
+        
+        <div style="margin-top:10px;">
+            <input type="submit" value="Kaydet" />
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btn-create").click(function () {
+            $("#dialog-user").dialog("open");
+            $("#frm-create")[0].reset();
+            $("#KullaniciID").val("0");
+        });
+
+        $("#dialog-user").dialog({
+            width: 450,
+            height: 500,
+            autoOpen: false
+        });
+        $("#BolumID").change(function () {
+            var id = $(this).val();
+            var ProgramList = $("#ProgramID");
+            ProgramList.empty();
+            $.ajax({
+                url: "/Home/ProgramList",
+                type: 'POST',
+                dataType: 'json',
+                data : {'id': id},
+                success: function (data) {
+                    $.each(data, function (index, option) {
+                        ProgramList.append('<option value=' + option.Value + '> ' + option.Text + ' </option>')
+                    });
+                }
+            });
+        });
+
+    });
+
+    function Create(result) {
+        if (result == "1") {
+            $.ajax({
+                url: '/Home/KullaniciList',
+                type: 'get',
+                dataType: 'html',
+                success: function (data) {
+                    $("#user-content").html(data);
+                    $("#dialog-user").dialog("close");
+                }
+
+            });
+
+        }
+    }
+    $(document).on("click", ".delete-row", function () {
+        var confirmDelete = confirm("Silme İşlemini Onaylıyormusunuz?")
+        if (confirmDelete) {
+            var id = $(this).attr("data-id");
+            var deleteTR = $(this).closest("tr") ;        // tablodaki tr tagını bulma işlemi
+            $.ajax({
+                url: '/Home/Delete/' + id,
+                type: 'POST',
+                succcess: function (result)   { //result returndeki 1 veya -1 değerini döndürüyor.      // delete actionresultdaki tanımladığımız işlem başarılı ise return'daki 1 değerini döndürecek.
+                    //eğer işlem başarısızsa catch'deki -1 değerini döndürecek.
+                    if (result == "1") {
+                        deleteTR.fadeOut(1000, function () {  // silme işlemini animasyonlu bir şekilde geciktirme 
+                            deleteTR.remove();  // row satırını silecek tıklanan buton elementi
+                        });
+                        
+                    }
+                    else {
+                        alert("İşlem Sırasında Hata Oluştu");
+                    }
+                }
+            })
+        }
+    });
+</script>
